@@ -91,4 +91,8 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+export default app;
+
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  bootstrap();
+}
