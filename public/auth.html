@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Validra — Sign In</title>
+  <meta name="description" content="Sign in or create a Validra account to validate startup ideas with AI-powered similarity search."/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚗️</text></svg>"/>
+  <style>
+    /* ── Auth-specific styles ─────────────────────────────────────── */
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+
+    .auth-page {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+
+    /* Left panel — visual / brand */
+    .auth-brand {
+      background: var(--surface-container);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(2rem, 5vw, 4rem);
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-brand__logo {
+      font-family: var(--font-headline);
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--on-surface);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .auth-brand__logo span { color: var(--primary); }
+
+    .auth-brand__illustration {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+    .auth-brand__quote {
+      background: var(--surface-container-high);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem 2rem;
+      border-left: 3px solid var(--primary);
+    }
+    .auth-brand__quote blockquote {
+      font-family: var(--font-headline);
+      font-size: 1.2rem;
+      color: var(--on-surface);
+      font-style: italic;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+    .auth-brand__quote cite {
+      font-size: 0.82rem;
+      color: var(--on-surface-variant);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* Stats row on brand panel */
+    .auth-stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .auth-stat {
+      background: var(--surface-container-high);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      text-align: center;
+    }
+    .auth-stat__value {
+      font-family: var(--font-headline);
+      font-size: 1.7rem;
+      color: var(--primary);
+      display: block;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .auth-stat__label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    /* Right panel — form */
+    .auth-form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(2rem,5vw,4rem);
+      background: var(--background);
+    }
+    .auth-form-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+    .auth-form-wrap h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .auth-form-wrap > p {
+      color: var(--on-surface-variant);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      background: var(--surface-container);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      text-align: center;
+      border: none;
+      background: none;
+      border-radius: calc(var(--radius-md) - 2px);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--on-surface-variant);
+      transition: var(--transition);
+    }
+    .auth-tab.active {
+      background: var(--background);
+      color: var(--on-surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Input with icon */
+    .input-group { position: relative; }
+    .input-group .input-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--outline);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .input-group .form-input { padding-left: 2.75rem; }
+
+    /* Password toggle */
+    .input-group .pass-toggle {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--outline);
+      font-size: 1rem;
+      padding: 0;
+      transition: var(--transition);
+    }
+    .input-group .pass-toggle:hover { color: var(--on-surface); }
+
+    /* Error message */
+    .auth-error {
+      background: var(--error-container);
+      color: var(--error);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: none;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.2s ease;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--outline);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .auth-divider::before,.auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--outline-variant);
+    }
+
+    /* Strength meter */
+    .strength-meter { display: none; margin-top: 0.4rem; }
+    .strength-track {
+      height: 4px;
+      background: var(--surface-container);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 0.3rem;
+    }
+    .strength-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.3s, background 0.3s;
+    }
+    .strength-label { font-size: 0.75rem; color: var(--on-surface-variant); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-brand { display: none; }
+      .auth-form-panel { padding: 2rem 1.5rem; }
+    }
+
+    /* SVG illustration inside brand */
+    .brand-svg { width: 100%; max-width: 340px; height: auto; }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ── Left: Brand Panel ──────────────────────────────────────────── -->
+  <aside class="auth-brand">
+    <a href="/" class="auth-brand__logo">Validra<span>.</span></a>
+
+    <div class="auth-brand__illustration">
+      <!-- Inline SVG illustration — idea network -->
+      <svg class="brand-svg" viewBox="0 0 400 380" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Background glow -->
+        <ellipse cx="200" cy="190" rx="160" ry="140" fill="#c2652a" fill-opacity="0.06"/>
+        <!-- Network lines -->
+        <line x1="200" y1="120" x2="130" y2="200" stroke="#c2652a" stroke-opacity="0.3" stroke-width="1.5"/>
+        <line x1="200" y1="120" x2="270" y2="190" stroke="#c2652a" stroke-opacity="0.3" stroke-width="1.5"/>
+        <line x1="130" y1="200" x2="160" y2="290" stroke="#c2652a" stroke-opacity="0.2" stroke-width="1.5"/>
+        <line x1="270" y1="190" x2="240" y2="290" stroke="#c2652a" stroke-opacity="0.2" stroke-width="1.5"/>
+        <line x1="130" y1="200" x2="80" y2="270" stroke="#c2652a" stroke-opacity="0.15" stroke-width="1"/>
+        <line x1="270" y1="190" x2="330" y2="250" stroke="#c2652a" stroke-opacity="0.15" stroke-width="1"/>
+        <line x1="160" y1="290" x2="240" y2="290" stroke="#9a9088" stroke-opacity="0.3" stroke-width="1"/>
+        <!-- Outer nodes -->
+        <circle cx="80"  cy="270" r="8" fill="#f6f0e8" stroke="#c2652a" stroke-opacity="0.5" stroke-width="1.5"/>
+        <circle cx="330" cy="250" r="8" fill="#f6f0e8" stroke="#c2652a" stroke-opacity="0.5" stroke-width="1.5"/>
+        <circle cx="160" cy="290" r="10" fill="#f6f0e8" stroke="#c2652a" stroke-opacity="0.6" stroke-width="2"/>
+        <circle cx="240" cy="290" r="10" fill="#f6f0e8" stroke="#c2652a" stroke-opacity="0.6" stroke-width="2"/>
+        <!-- Secondary nodes -->
+        <circle cx="130" cy="200" r="16" fill="#fbe8d8" stroke="#c2652a" stroke-opacity="0.8" stroke-width="2"/>
+        <circle cx="270" cy="190" r="16" fill="#fbe8d8" stroke="#c2652a" stroke-opacity="0.8" stroke-width="2"/>
+        <!-- Central glow -->
+        <circle cx="200" cy="120" r="32" fill="#c2652a" fill-opacity="0.12"/>
+        <!-- Central bulb -->
+        <circle cx="200" cy="120" r="24" fill="#c2652a"/>
+        <path d="M193 108 Q200 98 207 108 L210 125 Q205 130 200 130 Q195 130 190 125 Z" fill="white" fill-opacity="0.9"/>
+        <line x1="197" y1="132" x2="203" y2="132" stroke="white" stroke-opacity="0.7" stroke-width="2"/>
+        <line x1="198" y1="136" x2="202" y2="136" stroke="white" stroke-opacity="0.5" stroke-width="2"/>
+        <!-- Small dots orbit -->
+        <circle cx="200" cy="88"  r="4" fill="#c2652a" fill-opacity="0.4"/>
+        <circle cx="228" cy="96"  r="3" fill="#c2652a" fill-opacity="0.3"/>
+        <circle cx="172" cy="96"  r="3" fill="#c2652a" fill-opacity="0.3"/>
+        <!-- Labels inside secondary nodes -->
+        <text x="130" y="204" font-family="Georgia,serif" font-size="8" fill="#c2652a" text-anchor="middle" font-style="italic">AI</text>
+        <text x="270" y="194" font-family="Georgia,serif" font-size="7" fill="#c2652a" text-anchor="middle" font-style="italic">SaaS</text>
+        <text x="160" y="294" font-family="Georgia,serif" font-size="7" fill="#605850" text-anchor="middle">Bio</text>
+        <text x="240" y="294" font-family="Georgia,serif" font-size="7" fill="#605850" text-anchor="middle">Fin</text>
+      </svg>
+    </div>
+
+    <div class="auth-stats">
+      <div class="auth-stat">
+        <span class="auth-stat__value" id="brand-total">209</span>
+        <span class="auth-stat__label">Ideas</span>
+      </div>
+      <div class="auth-stat">
+        <span class="auth-stat__value">10</span>
+        <span class="auth-stat__label">Domains</span>
+      </div>
+      <div class="auth-stat">
+        <span class="auth-stat__value">384</span>
+        <span class="auth-stat__label">Dimensions</span>
+      </div>
+    </div>
+
+    <div class="auth-brand__quote">
+      <blockquote>"Validate before you build. Analyse before you invest."</blockquote>
+      <cite>— Validra AI Synthesis Engine</cite>
+    </div>
+  </aside>
+
+  <!-- ── Right: Form Panel ──────────────────────────────────────────── -->
+  <main class="auth-form-panel">
+    <div class="auth-form-wrap">
+
+      <h1>Welcome back</h1>
+      <p id="form-subtitle">Sign in to your Validra account to continue analysing ideas.</p>
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')" role="tab" aria-selected="true">Sign In</button>
+        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')" role="tab" aria-selected="false">Create Account</button>
+      </div>
+
+      <!-- Error banner -->
+      <div class="auth-error" id="auth-error" role="alert"></div>
+
+      <!-- ── Login Form ─────────────────────────────────────────────── -->
+      <form id="login-form" novalidate>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email address</label>
+            <div class="input-group">
+              <span class="input-icon">✉</span>
+              <input class="form-input" type="email" id="login-email" name="email" placeholder="you@example.com" autocomplete="email" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <label class="form-label" for="login-password">Password</label>
+              <a href="#" style="font-size:0.8rem;color:var(--on-surface-variant)">Forgot password?</a>
+            </div>
+            <div class="input-group">
+              <span class="input-icon">🔒</span>
+              <input class="form-input" type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password" required/>
+              <button type="button" class="pass-toggle" onclick="togglePass('login-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--on-surface-variant);">
+            <input type="checkbox" id="remember-me" style="accent-color:var(--primary);width:16px;height:16px;"/>
+            <label for="remember-me">Remember me for 7 days</label>
+          </div>
+
+          <button type="submit" class="btn btn--primary" id="login-btn" style="width:100%;justify-content:center;border-radius:var(--radius-md);padding:0.875rem;">
+            Sign In
+          </button>
+
+          <div class="auth-divider">or</div>
+
+          <p style="text-align:center;font-size:0.88rem;color:var(--on-surface-variant);">
+            Don't have an account?
+            <a href="#" onclick="switchTab('register');return false;" style="color:var(--primary);font-weight:600">Create one free</a>
+          </p>
+        </div>
+      </form>
+
+      <!-- ── Register Form (hidden by default) ─────────────────────── -->
+      <form id="register-form" style="display:none;" novalidate>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full name</label>
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input class="form-input" type="text" id="reg-name" name="name" placeholder="Your name" autocomplete="name" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email address</label>
+            <div class="input-group">
+              <span class="input-icon">✉</span>
+              <input class="form-input" type="email" id="reg-email" name="email" placeholder="you@example.com" autocomplete="email" required/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <div class="input-group">
+              <span class="input-icon">🔒</span>
+              <input class="form-input" type="password" id="reg-password" name="password" placeholder="Min. 6 characters" autocomplete="new-password" required oninput="checkStrength(this.value)"/>
+              <button type="button" class="pass-toggle" onclick="togglePass('reg-password', this)" aria-label="Toggle password visibility">👁</button>
+            </div>
+            <div class="strength-meter" id="strength-meter">
+              <div class="strength-track"><div class="strength-fill" id="strength-fill"></div></div>
+              <span class="strength-label" id="strength-label"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm">Confirm password</label>
+            <div class="input-group">
+              <span class="input-icon">🔏</span>
+              <input class="form-input" type="password" id="reg-confirm" name="confirm" placeholder="Re-enter password" autocomplete="new-password" required/>
+            </div>
+          </div>
+
+          <p style="font-size:0.8rem;color:var(--on-surface-variant);line-height:1.5;">
+            By creating an account you agree to our
+            <a href="#" style="color:var(--primary)">Terms</a> and
+            <a href="#" style="color:var(--primary)">Privacy Policy</a>.
+          </p>
+
+          <button type="submit" class="btn btn--primary" id="register-btn" style="width:100%;justify-content:center;border-radius:var(--radius-md);padding:0.875rem;">
+            Create Account
+          </button>
+
+          <div class="auth-divider">or</div>
+
+          <p style="text-align:center;font-size:0.88rem;color:var(--on-surface-variant);">
+            Already have an account?
+            <a href="#" onclick="switchTab('login');return false;" style="color:var(--primary);font-weight:600">Sign in</a>
+          </p>
+        </div>
+      </form>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<script>
+  const API = 'http://localhost:3000';
+
+  /* ── Tab switcher ─────────────────────────────────────────────────── */
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('login-form').style.display    = isLogin ? 'block' : 'none';
+    document.getElementById('register-form').style.display = isLogin ? 'none'  : 'block';
+    document.getElementById('tab-login').classList.toggle('active',    isLogin);
+    document.getElementById('tab-register').classList.toggle('active', !isLogin);
+    document.querySelector('h1').textContent           = isLogin ? 'Welcome back'    : 'Create account';
+    document.getElementById('form-subtitle').textContent = isLogin
+      ? 'Sign in to your Validra account to continue analysing ideas.'
+      : 'Join Validra and start validating your startup ideas today.';
+    clearError();
+  }
+
+  /* ── Error display ────────────────────────────────────────────────── */
+  function showError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function clearError() {
+    const el = document.getElementById('auth-error');
+    el.style.display = 'none'; el.textContent = '';
+  }
+
+  /* ── Toast ────────────────────────────────────────────────────────── */
+  function showToast(msg, type = 'default') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast toast--${type}`; t.textContent = msg;
+    c.appendChild(t); setTimeout(() => t.remove(), 3500);
+  }
+
+  /* ── Password toggle ──────────────────────────────────────────────── */
+  function togglePass(id, btn) {
+    const input = document.getElementById(id);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? '👁' : '🙈';
+  }
+
+  /* ── Password strength ────────────────────────────────────────────── */
+  function checkStrength(val) {
+    const meter  = document.getElementById('strength-meter');
+    const fill   = document.getElementById('strength-fill');
+    const label  = document.getElementById('strength-label');
+    if (!val) { meter.style.display = 'none'; return; }
+    meter.style.display = 'block';
+    let score = 0;
+    if (val.length >= 6)  score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+      { w: '25%', bg: '#c0392b', text: 'Weak' },
+      { w: '50%', bg: '#e0a030', text: 'Fair' },
+      { w: '75%', bg: '#6a9e55', text: 'Good' },
+      { w: '100%',bg: '#3a9a5c', text: 'Strong' },
+    ];
+    const l = levels[Math.max(0, score - 1)];
+    fill.style.width = l.w; fill.style.background = l.bg;
+    label.textContent = l.text; label.style.color = l.bg;
+  }
+
+  /* ── Set button loading state ─────────────────────────────────────── */
+  function setLoading(btnId, loading, originalText) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading ? '<span class="spinner"></span> Please wait…' : originalText;
+  }
+
+  /* ── Auth: store token and redirect ──────────────────────────────── */
+  function onAuth(data) {
+    localStorage.setItem('validra_token', data.token);
+    localStorage.setItem('validra_user', JSON.stringify(data.user));
+    showToast(`Welcome, ${data.user.name}! Redirecting…`, 'success');
+    setTimeout(() => { window.location.href = '/'; }, 800);
+  }
+
+  /* ── Login submit ─────────────────────────────────────────────────── */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearError();
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showError('Please fill in all fields.'); return; }
+    setLoading('login-btn', true, 'Sign In');
+    try {
+      const res  = await fetch(`${API}/auth/login`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!data.success) { showError(data.error || 'Login failed.'); return; }
+      onAuth(data);
+    } catch { showError('Cannot reach server. Is npm run dev running?'); }
+    finally   { setLoading('login-btn', false, 'Sign In'); }
+  });
+
+  /* ── Register submit ──────────────────────────────────────────────── */
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); clearError();
+    const name     = document.getElementById('reg-name').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm  = document.getElementById('reg-confirm').value;
+    if (!name || !email || !password || !confirm) { showError('Please fill in all fields.'); return; }
+    if (password !== confirm) { showError('Passwords do not match.'); return; }
+    if (password.length < 6)  { showError('Password must be at least 6 characters.'); return; }
+    setLoading('register-btn', true, 'Create Account');
+    try {
+      const res  = await fetch(`${API}/auth/register`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!data.success) { showError(data.error || 'Registration failed.'); return; }
+      onAuth(data);
+    } catch { showError('Cannot reach server. Is npm run dev running?'); }
+    finally   { setLoading('register-btn', false, 'Create Account'); }
+  });
+
+  /* ── If already logged in, redirect ──────────────────────────────── */
+  if (localStorage.getItem('validra_token')) { window.location.href = '/'; }
+
+  /* ── Load live stats ──────────────────────────────────────────────── */
+  fetch(`${API}/api/trends`).then(r => r.json()).then(d => {
+    if (d.grand_total) document.getElementById('brand-total').textContent = d.grand_total;
+  }).catch(() => {});
+</script>
+</body>
+</html>

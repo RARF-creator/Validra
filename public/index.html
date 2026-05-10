@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validra — Startup Idea Validator</title>
+  <meta name="description" content="Validra analyses your startup idea against 200+ real-world registrations. Discover uniqueness scores, market trends, and competitor proximity with AI-powered vector search." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚗️</text></svg>" />
+
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────── -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+    <a href="/" class="nav__logo">Validr<span>a.</span></a>
+
+    <ul class="nav__links" role="list">
+      <li><button data-view="validator" class="active" id="nav-validator">Validator</button></li>
+      <li><button data-view="trends"    id="nav-trends">Trends</button></li>
+      <li><button data-view="ideas"     id="nav-ideas">🔒 Vault</button></li>
+      <li><button data-view="about"     id="nav-about">About</button></li>
+    </ul>
+
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="nav__status">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Connecting…</span>
+      </div>
+      <!-- Auth area — swapped by JS -->
+      <div id="nav-auth-area">
+        <div class="nav-auth-btns">
+          <a href="/auth.html" class="btn btn--ghost btn--sm">Sign In</a>
+          <a href="/auth.html" class="btn btn--primary btn--sm">Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Stats Strip ─────────────────────────────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stats-strip__inner">
+    <div class="stats-strip__item">🧠 Model: <span>all-MiniLM-L6-v2</span></div>
+    <div class="strip-divider"></div>
+    <div class="stats-strip__item">📐 Dims: <span>384</span></div>
+    <div class="strip-divider"></div>
+    <div class="stats-strip__item">🌍 Ideas in DB: <span id="strip-total">—</span></div>
+    <div class="strip-divider"></div>
+    <div class="stats-strip__item">🔥 Hottest: <span id="strip-hottest">—</span></div>
+    <div class="strip-divider"></div>
+    <div class="stats-strip__item">💡 Opportunity: <span id="strip-opportunity">—</span></div>
+    <div class="strip-divider"></div>
+    <div class="stats-strip__item">🗂 Domains covered: <span>10</span></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEW 1 — VALIDATOR                                                   -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-validator" class="view active">
+
+  <!-- Hero Split -->
+  <section class="hero">
+    <div class="hero-split">
+
+      <!-- Left: copy -->
+      <div>
+        <div class="hero__eyebrow">Idea Intelligence</div>
+        <h1 class="hero__title">Validate Your<br><em>Vision</em></h1>
+        <div class="hero-features">
+          <div class="hero-feature">AI vector search against 200+ real-world startup registrations</div>
+          <div class="hero-feature">384-dimensional semantic embeddings — runs fully locally</div>
+          <div class="hero-feature">Instant uniqueness score + top competitor proximity</div>
+          <div class="hero-feature">Domain saturation analysis across 10 booming sectors</div>
+          <div class="hero-feature">Real-time autocomplete from your live database</div>
+        </div>
+        <div class="hero__actions">
+          <a href="#input-section" class="btn btn--primary">↗ Start Analysis</a>
+          <button class="btn btn--ghost" data-view="trends">View Market Trends</button>
+        </div>
+      </div>
+
+      <!-- Right: visual -->
+      <div class="hero-visual">
+        <svg viewBox="0 0 420 380" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px" aria-hidden="true">
+          <!-- Outer ring -->
+          <circle cx="210" cy="190" r="155" stroke="#d8d0c8" stroke-width="1" stroke-dasharray="4 6"/>
+          <circle cx="210" cy="190" r="110" stroke="#d8d0c8" stroke-width="1" stroke-dasharray="3 8" opacity="0.5"/>
+          <!-- Connection lines -->
+          <line x1="210" y1="190" x2="100" y2="100" stroke="#c2652a" stroke-opacity="0.25" stroke-width="1.5"/>
+          <line x1="210" y1="190" x2="320" y2="110" stroke="#c2652a" stroke-opacity="0.25" stroke-width="1.5"/>
+          <line x1="210" y1="190" x2="340" y2="280" stroke="#c2652a" stroke-opacity="0.2" stroke-width="1.5"/>
+          <line x1="210" y1="190" x2="80"  y2="290" stroke="#c2652a" stroke-opacity="0.2" stroke-width="1.5"/>
+          <line x1="210" y1="190" x2="135" y2="330" stroke="#c2652a" stroke-opacity="0.15" stroke-width="1"/>
+          <line x1="210" y1="190" x2="280" y2="340" stroke="#c2652a" stroke-opacity="0.15" stroke-width="1"/>
+          <line x1="210" y1="190" x2="60"  y2="185" stroke="#c2652a" stroke-opacity="0.12" stroke-width="1"/>
+          <line x1="210" y1="190" x2="360" y2="180" stroke="#c2652a" stroke-opacity="0.12" stroke-width="1"/>
+          <!-- Satellite nodes -->
+          <circle cx="100" cy="100" r="22" fill="#fbe8d8" stroke="#c2652a" stroke-width="1.5"/>
+          <text x="100" y="104" font-family="Georgia,serif" font-size="9" fill="#c2652a" text-anchor="middle" font-style="italic">AI</text>
+          <circle cx="320" cy="110" r="22" fill="#fbe8d8" stroke="#c2652a" stroke-width="1.5"/>
+          <text x="320" y="114" font-family="Georgia,serif" font-size="8" fill="#c2652a" text-anchor="middle">SaaS</text>
+          <circle cx="340" cy="280" r="20" fill="#fbe8d8" stroke="#c2652a" stroke-width="1.5"/>
+          <text x="340" y="284" font-family="Georgia,serif" font-size="8" fill="#c2652a" text-anchor="middle">Bio</text>
+          <circle cx="80"  cy="290" r="20" fill="#fbe8d8" stroke="#c2652a" stroke-width="1.5"/>
+          <text x="80" y="294" font-family="Georgia,serif" font-size="7" fill="#c2652a" text-anchor="middle">Fin</text>
+          <circle cx="60"  cy="185" r="14" fill="#f6f0e8" stroke="#9a9088" stroke-width="1" opacity="0.8"/>
+          <circle cx="360" cy="180" r="14" fill="#f6f0e8" stroke="#9a9088" stroke-width="1" opacity="0.8"/>
+          <circle cx="135" cy="330" r="14" fill="#f6f0e8" stroke="#9a9088" stroke-width="1" opacity="0.8"/>
+          <circle cx="280" cy="340" r="14" fill="#f6f0e8" stroke="#9a9088" stroke-width="1" opacity="0.8"/>
+          <!-- Central glow -->
+          <circle cx="210" cy="190" r="50" fill="#c2652a" fill-opacity="0.08"/>
+          <circle cx="210" cy="190" r="38" fill="#fbe8d8"/>
+          <circle cx="210" cy="190" r="38" stroke="#c2652a" stroke-width="2.5"/>
+          <!-- Central logo mark -->
+          <text x="210" y="186" font-family="Georgia,serif" font-size="18" fill="#c2652a" text-anchor="middle" font-weight="500">V</text>
+          <text x="210" y="202" font-family="Georgia,serif" font-size="9" fill="#9a9088" text-anchor="middle">100%</text>
+          <!-- Score ring arc (partial) -->
+          <path d="M210 152 A38 38 0 1 1 172.1 214" stroke="#c2652a" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Floating badge -->
+          <rect x="255" y="148" width="90" height="32" rx="8" fill="white" filter="drop-shadow(0 2px 6px rgba(58,48,42,0.10))"/>
+          <text x="300" y="162" font-family="sans-serif" font-size="8" fill="#605850" text-anchor="middle" font-weight="600">UNIQUENESS</text>
+          <text x="300" y="174" font-family="Georgia,serif" font-size="10" fill="#c2652a" text-anchor="middle">84%</text>
+          <!-- Second badge -->
+          <rect x="58" y="148" width="86" height="32" rx="8" fill="white" filter="drop-shadow(0 2px 6px rgba(58,48,42,0.10))"/>
+          <text x="101" y="162" font-family="sans-serif" font-size="8" fill="#605850" text-anchor="middle" font-weight="600">RISK LEVEL</text>
+          <text x="101" y="174" font-family="sans-serif" font-size="9" fill="#3a9a5c" text-anchor="middle" font-weight="700">LOW ✓</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Domain Ticker -->
+  <div class="domains-ticker" aria-hidden="true">
+    <div class="ticker-track" id="ticker-track">
+      <div class="ticker-item">🤖 Agentic AI</div>
+      <div class="ticker-item">🌿 Climate Tech</div>
+      <div class="ticker-item">💳 Fintech</div>
+      <div class="ticker-item">🩺 HealthTech</div>
+      <div class="ticker-item">🔐 Cybersecurity</div>
+      <div class="ticker-item">📚 EdTech</div>
+      <div class="ticker-item">🚚 Logistics</div>
+      <div class="ticker-item">🛸 SpaceTech</div>
+      <div class="ticker-item">🌾 AgriTech</div>
+      <div class="ticker-item">🛍️ Retail/E-commerce</div>
+      <!-- duplicate for seamless loop -->
+      <div class="ticker-item">🤖 Agentic AI</div>
+      <div class="ticker-item">🌿 Climate Tech</div>
+      <div class="ticker-item">💳 Fintech</div>
+      <div class="ticker-item">🩺 HealthTech</div>
+      <div class="ticker-item">🔐 Cybersecurity</div>
+      <div class="ticker-item">📚 EdTech</div>
+      <div class="ticker-item">🚚 Logistics</div>
+      <div class="ticker-item">🛸 SpaceTech</div>
+      <div class="ticker-item">🌾 AgriTech</div>
+      <div class="ticker-item">🛍️ Retail/E-commerce</div>
+    </div>
+  </div>
+
+  <!-- Input Section (Centered) -->
+  <section class="section" id="input-section">
+    <div style="max-width: 680px; margin: 0 auto;">
+      <div class="section__header" style="text-align: center;">
+        <div class="badge-label">INPUT MODULE</div>
+        <h2>Describe the Spark</h2>
+        <p>Deep vector analysis starts with your perspective. Be as detailed as possible — richer descriptions yield sharper results.</p>
+      </div>
+
+      <form id="validator-form" novalidate>
+        <div class="validator-form">
+          <div class="form-group">
+            <label class="form-label" for="idea-description">Concept Overview</label>
+            <textarea class="form-textarea" id="idea-description" name="description"
+              placeholder="What problem were you solving? What is it for?"
+              maxlength="1000" rows="8" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group autocomplete-wrap">
+              <label class="form-label" for="idea-domain">Target Industry</label>
+              <input class="form-input" type="text" id="idea-title" name="title"
+                placeholder="e.g. Fintech, Agrotech"
+                autocomplete="off" maxlength="200" required/>
+              <div id="autocomplete-dropdown" class="autocomplete-dropdown" role="listbox"></div>
+              <div id="domain-suggestion-container" class="suggestion-chip-wrap"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="company-size">Company Size</label>
+              <input class="form-input" type="text" id="company-size" name="size" placeholder="e.g. AI driven routing" />
+            </div>
+          </div>
+
+          <div class="validator-form__actions">
+            <button type="submit" class="btn btn--primary" style="width:100%; justify-content:center;" id="analyze-btn">Begin Deep Validation ⚡</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Simulating Market Variables Module -->
+    <div id="simulating-section" style="margin-top: 4rem; text-align: center;">
+      <div class="section__header" style="margin-bottom: 2rem;">
+        <h3>Simulating Market Variables</h3>
+        <p style="margin: 0 auto;">Our engine analyzes 50,000+ data points including patent filings, consumer sentiment, and historical failure patterns.</p>
+      </div>
+      <div class="grid-4">
+        <div class="process-card">
+          <div class="process-card__icon">✽</div>
+          <div class="process-card__label">MARKET FIT</div>
+        </div>
+        <div class="process-card">
+          <div class="process-card__icon">⚛</div>
+          <div class="process-card__label">FEASIBILITY</div>
+        </div>
+        <div class="process-card">
+          <div class="process-card__icon">📈</div>
+          <div class="process-card__label">SCALABILITY</div>
+        </div>
+        <div class="process-card">
+          <div class="process-card__icon">🎯</div>
+          <div class="process-card__label">DISTRIBUTION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Results Area -->
+    <div id="results-area" style="display:none; margin-top: 5rem;">
+      <div class="results-dashboard">
+        <div class="dashboard-col">
+          <div class="results-card results-card--score">
+            <div class="results-card__header">
+              <h4>Uniqueness Score</h4>
+            </div>
+            <div class="score-gauge">
+              <svg viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                <circle class="gauge-fill" id="gauge-fill-circle" cx="50" cy="50" r="45" stroke-dasharray="0 283"></circle>
+                <text x="50" y="50" class="gauge-text" id="gauge-score-value" dominant-baseline="middle">0</text>
+                <text x="50" y="74" class="gauge-subtext" dominant-baseline="middle">PERCENTILE</text>
+              </svg>
+            </div>
+            <p class="results-card__footer">Your idea stands out in the high-tier of concepts analyzed this quarter in high-definition Sahara "Efficiency Precision".</p>
+          </div>
+          <div id="results-actions" style="margin-top: 1.5rem; display: none; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn--primary btn--sm" id="save-vault-btn" style="background: #3a302a;">🔒 Save to Private Vault</button>
+            <button class="btn btn--primary btn--sm" id="proceed-launch-btn">🚀 Proceed to Launch</button>
+          </div>
+        </div>
+
+        <div class="dashboard-col">
+          <div class="results-card">
+            <div class="results-card__header">
+              <h4>Proximal Competitors</h4>
+              <span class="results-card__meta" id="competitor-count">0 Platforms Found</span>
+            </div>
+            <div id="competitor-list" class="competitor-list">
+              <!-- Dynamic cards -->
+            </div>
+          </div>
+
+          <div class="results-card" style="margin-top: 1.5rem;">
+            <div class="results-card__header">
+              <h4>Industry Momentum</h4>
+              <span class="results-card__meta">Projected expansion of your sector (2020-2024)</span>
+            </div>
+            <div class="momentum-chart">
+              <div class="bar-chart" id="momentum-bar-chart">
+                <div class="bar" style="height: 30%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 75%"></div>
+                <div class="bar" style="height: 90%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Steps -->
+  <div class="divider"></div>
+  <section class="section" style="padding-bottom:0;">
+    <div class="section__header">
+      <h2>How It Works</h2>
+      <p>Three steps. Milliseconds to execute.</p>
+    </div>
+  </section>
+  <div style="background:var(--surface-container-low);border-top:1px solid var(--outline-variant);border-bottom:1px solid var(--outline-variant);max-width:100%;">
+    <div class="process-steps" style="max-width:1200px;margin:0 auto;">
+      <div class="process-step">
+        <div class="process-step__num">01</div>
+        <h4>Vector Embedding</h4>
+        <p>Title + description are combined and passed through the all-MiniLM-L6-v2 model locally — no external API call. Output: a 384-dimensional float array.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-step__num">02</div>
+        <h4>$vectorSearch</h4>
+        <p>MongoDB Atlas finds the 3 most conceptually similar ideas using HNSW approximate nearest-neighbor search with cosine similarity metric.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-step__num">03</div>
+        <h4>Risk Verdict</h4>
+        <p>Similarity scores are interpreted into a risk level (HIGH / MEDIUM / CROSS-DOMAIN / LOW) and a uniqueness percentage is computed as <em>1 − top_score</em>.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-step__num">04</div>
+        <h4>Save & Track</h4>
+        <p>If novel enough, save your idea directly to Atlas. It then becomes part of the dataset — sharpening future validations for everyone.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Strip -->
+  <div class="quote-strip">
+    <div class="quote-strip__inner">
+      <blockquote>"The convergence of Agentic AI and Climate Tech will redefine industrial logistics by Q3 2026."</blockquote>
+      <cite>— Validra Synthesis Engine · Market Intelligence Report 2024</cite>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <section class="section">
+    <div class="section__header">
+      <h2>What Builders Say</h2>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial">
+        <blockquote>"I validated 3 startup concepts in under 10 minutes. Validra showed me there were already 8 similar ideas in HealthTech — saved me months of wasted effort."</blockquote>
+        <div class="testimonial__author">
+          <div class="testimonial__avatar">AS</div>
+          <div><div class="testimonial__name">Ayesha S.</div><div class="testimonial__role">Founder · MedPulse AI</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <blockquote>"The vector search is surprisingly accurate. It found a cross-domain competitor I hadn't even considered — a logistics company solving the same B2B bottleneck."</blockquote>
+        <div class="testimonial__author">
+          <div class="testimonial__avatar">KM</div>
+          <div><div class="testimonial__name">Khalid M.</div><div class="testimonial__role">CTO · SupplyLink</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <blockquote>"The Trends dashboard is worth it alone. Seeing that AgriTech was under-saturated helped us pivot our EdTech idea into a farming training platform."</blockquote>
+        <div class="testimonial__author">
+          <div class="testimonial__avatar">PN</div>
+          <div><div class="testimonial__name">Priya N.</div><div class="testimonial__role">Product Lead · HarvestIQ</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Public Idea Database (moved from archive) -->
+  <div class="divider"></div>
+  <section class="section">
+    <div class="section__header" style="text-align: center;">
+      <div class="badge-label">DATABASE</div>
+      <h2>Public Idea Archive</h2>
+      <p>Browse all startup ideas in the Validra database — user submissions, seed data, and real-world company migrations.</p>
+    </div>
+    <div id="ideas-container"><div class="loading-overlay"><div class="spinner"></div><p>Loading ideas…</p></div></div>
+  </section>
+
+</div><!-- /view-validator -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEW 2 — TRENDS                                                      -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-trends" class="view">
+
+  <section class="hero">
+    <div class="hero-split">
+      <div>
+        <div class="hero__eyebrow">Market Intelligence</div>
+        <h1 class="hero__title">Global Startup<br><em>Landscape</em></h1>
+        <p class="hero__subtitle">Validra's proprietary saturation index maps innovation potential against existing market capture. Identify the "White Space" where your idea can thrive.</p>
+        <div class="hero__actions">
+          <button class="btn btn--primary" id="refresh-trends">↺ Refresh Data</button>
+          <button class="btn btn--ghost" data-view="validator">↗ Validate an Idea</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <!-- Bar chart illustration -->
+        <svg viewBox="0 0 380 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px" aria-hidden="true">
+          <text x="16" y="28" font-family="Georgia,serif" font-size="13" fill="#3a302a" font-style="italic">Domain Saturation Index</text>
+          <!-- Bars -->
+          <rect x="20"  y="220" width="28" height="50"  rx="3" fill="#c2652a" opacity="0.9"/>
+          <rect x="60"  y="180" width="28" height="90"  rx="3" fill="#c2652a" opacity="0.85"/>
+          <rect x="100" y="140" width="28" height="130" rx="3" fill="#c2652a"/>
+          <rect x="140" y="150" width="28" height="120" rx="3" fill="#c2652a" opacity="0.9"/>
+          <rect x="180" y="170" width="28" height="100" rx="3" fill="#c2652a" opacity="0.7"/>
+          <rect x="220" y="200" width="28" height="70"  rx="3" fill="#e08850" opacity="0.7"/>
+          <rect x="260" y="210" width="28" height="60"  rx="3" fill="#e08850" opacity="0.6"/>
+          <rect x="300" y="230" width="28" height="40"  rx="3" fill="#3a9a5c" opacity="0.7"/>
+          <rect x="340" y="240" width="28" height="30"  rx="3" fill="#3a9a5c" opacity="0.6"/>
+          <!-- Labels -->
+          <text x="34"  y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">Health</text>
+          <text x="74"  y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">EdTech</text>
+          <text x="114" y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">Agri</text>
+          <text x="154" y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">AI</text>
+          <text x="194" y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">Fin</text>
+          <text x="234" y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">Cyber</text>
+          <text x="274" y="282" font-size="7" fill="#605850" text-anchor="middle" font-family="sans-serif">Climate</text>
+          <text x="314" y="282" font-size="7" fill="#3a9a5c" text-anchor="middle" font-family="sans-serif" font-weight="700">Space</text>
+          <text x="354" y="282" font-size="7" fill="#3a9a5c" text-anchor="middle" font-family="sans-serif" font-weight="700">Retail</text>
+          <!-- Baseline -->
+          <line x1="16" y1="270" x2="380" y2="270" stroke="#d8d0c8" stroke-width="1"/>
+          <!-- Opportunity label -->
+          <rect x="294" y="186" width="88" height="22" rx="4" fill="#e8f5ee"/>
+          <text x="338" y="201" font-size="8" fill="#2a6e47" text-anchor="middle" font-family="sans-serif" font-weight="700">💡 Opportunity</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="section">
+    <div id="insights-container"><div class="loading-overlay"><div class="spinner"></div><p>Loading…</p></div></div>
+    <div id="trends-container"><div class="loading-overlay"><div class="spinner"></div><p>Loading market data…</p></div></div>
+  </section>
+
+  <div class="divider"></div>
+  <section class="section">
+    <div class="section__header"><h2>Competitive Landscape 2024–2026</h2><p>Validra synthesises complex registration data into actionable clarity.</p></div>
+    <div class="grid-2">
+      <div class="card"><h4>Innovation Velocity</h4><p style="margin-top:0.5rem">Real-time tracking of startup registrations per domain. The <strong>recent_7d</strong> field surfaces week-on-week momentum shifts.</p></div>
+      <div class="card"><h4>Disruption Sensitivity</h4><p style="margin-top:0.5rem">Domains with low idea counts but rising registrations signal emerging opportunity — find whitespace before it disappears.</p></div>
+      <div class="card"><h4>Source Integrity</h4><p style="margin-top:0.5rem">Every entry is tagged by origin: <span class="chip chip--primary">User</span> <span class="chip">Seed</span> <span class="chip">Migration</span> — giving you full provenance confidence.</p></div>
+      <div class="card"><h4>Predictive Synthesis</h4><p style="margin-top:0.5rem"><em style="font-family:var(--font-headline)">"Agentic AI + Climate Tech convergence will create $240B in new infrastructure spend by 2027."</em></p></div>
+    </div>
+  </section>
+
+</div><!-- /view-trends -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEW 3 — PRIVATE VAULT (Auth-Gated)                                  -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-ideas" class="view">
+
+  <!-- Full-page Auth Gate -->
+  <div id="vault-auth-gate">
+    <section class="hero">
+      <div style="text-align: center; max-width: 520px; margin: 0 auto;">
+        <div class="vault-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">🔐</div>
+        <div class="hero__eyebrow" style="justify-content: center;">Private Vault</div>
+        <h1 class="hero__title">Secure<br><em>Collection</em></h1>
+        <p class="hero__subtitle" style="max-width: 100%; margin-left: auto; margin-right: auto;">Your private ideas are encrypted and stored securely. Sign in or create a free account to access your vault.</p>
+
+        <!-- Auth tabs -->
+        <div style="margin-top: 2rem; max-width: 360px; margin-left: auto; margin-right: auto; text-align: left;">
+          <div style="display: flex; border-bottom: 2px solid var(--outline-variant); margin-bottom: 1.5rem;">
+            <button id="tab-login-btn" onclick="switchAuthTab('login')" style="flex:1; padding: 0.65rem; background: none; border: none; border-bottom: 2px solid var(--primary); margin-bottom: -2px; font-family: var(--font-body); font-size: 0.88rem; font-weight: 600; color: var(--primary); cursor: pointer;">Sign In</button>
+            <button id="tab-register-btn" onclick="switchAuthTab('register')" style="flex:1; padding: 0.65rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: var(--font-body); font-size: 0.88rem; font-weight: 500; color: var(--on-surface-variant); cursor: pointer;">Create Account</button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="vault-login-form" id="tab-login-panel">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" for="vault-email">Email</label>
+              <input class="form-input" type="email" id="vault-email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label" for="vault-password">Password</label>
+              <input class="form-input" type="password" id="vault-password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn--primary" id="vault-login-btn" style="width: 100%; justify-content: center;">🔓 Unlock Vault</button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="vault-register-form" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" for="reg-name">Full Name</label>
+              <input class="form-input" type="text" id="reg-name" placeholder="Your Name" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" for="reg-email">Email</label>
+              <input class="form-input" type="email" id="reg-email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label" for="reg-password">Password <span style="font-weight:400; color: var(--on-surface-variant);">(min 6 chars)</span></label>
+              <input class="form-input" type="password" id="reg-password" placeholder="Create a password" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn--primary" id="vault-register-btn" style="width: 100%; justify-content: center;">🚀 Create Account & Open Vault</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Unlocked Vault Content -->
+  <div id="vault-unlocked-content" style="display: none;">
+    <section class="hero">
+      <div class="hero-split">
+        <div>
+          <div class="hero__eyebrow">Private Vault</div>
+          <h1 class="hero__title">Your Secure<br><em>Ideas</em></h1>
+          <p class="hero__subtitle">Ideas stored here are private, encrypted, and invisible to public searches. Patent conflicts are monitored automatically.</p>
+          <div class="hero__actions">
+            <button class="btn btn--primary" data-view="validator">↗ Submit New Idea</button>
+            <button class="btn btn--ghost" id="refresh-vault">↺ Refresh</button>
+            <button class="btn btn--ghost" id="vault-logout-btn" style="color: var(--error);">⏻ Lock Vault</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <svg viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:320px" aria-hidden="true">
+            <!-- Shield shape -->
+            <path d="M160 40 L260 80 L260 160 Q260 240 160 270 Q60 240 60 160 L60 80 Z" fill="#fbe8d8" stroke="#c2652a" stroke-width="2"/>
+            <path d="M160 60 L240 92 L240 155 Q240 225 160 250 Q80 225 80 155 L80 92 Z" fill="white" stroke="#d8d0c8" stroke-width="1"/>
+            <!-- Lock icon -->
+            <rect x="135" y="130" width="50" height="40" rx="6" fill="#c2652a" opacity="0.15" stroke="#c2652a" stroke-width="2"/>
+            <path d="M145 130 L145 115 Q145 100 160 100 Q175 100 175 115 L175 130" fill="none" stroke="#c2652a" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="160" cy="150" r="5" fill="#c2652a"/>
+            <line x1="160" y1="155" x2="160" y2="162" stroke="#c2652a" stroke-width="2" stroke-linecap="round"/>
+            <!-- Status badges -->
+            <rect x="95" y="195" width="130" height="24" rx="12" fill="#e8f5ee"/>
+            <text x="160" y="211" font-family="sans-serif" font-size="9" fill="#2a6e47" text-anchor="middle" font-weight="700">✓ VAULT UNLOCKED</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+    <section class="section">
+      <div id="private-ideas-list">
+        <div class="loading-overlay"><div class="spinner"></div><p>Decrypting vault…</p></div>
+      </div>
+    </section>
+  </div>
+
+</div><!-- /view-ideas -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEW 4 — ABOUT                                                       -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-about" class="view">
+
+  <section class="hero">
+    <div class="hero-split">
+      <div>
+        <div class="hero__eyebrow">About Validra</div>
+        <h1 class="hero__title">Sun-Baked<br><em>Precision</em></h1>
+        <p class="hero__subtitle">An AI-powered startup idea similarity checker built on MongoDB Atlas Vector Search, local transformer embeddings, and a clean Node.js/Express API.</p>
+      </div>
+      <div class="hero-visual">
+        <svg viewBox="0 0 340 280" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;" aria-hidden="true">
+          <!-- Stack layers -->
+          <rect x="40" y="54" width="260" height="32" rx="8" fill="#c2652a" opacity="0.12"/>
+          <text x="170" y="74" font-family="Georgia,serif" font-size="11" fill="#c2652a" text-anchor="middle" font-style="italic">Frontend — Validra SPA</text>
+          <rect x="40" y="98" width="260" height="32" rx="8" fill="#c2652a" opacity="0.22"/>
+          <text x="170" y="118" font-family="Georgia,serif" font-size="11" fill="#c2652a" text-anchor="middle" font-style="italic">Express API · /auth · /api</text>
+          <rect x="40" y="142" width="260" height="32" rx="8" fill="#c2652a" opacity="0.35"/>
+          <text x="170" y="162" font-family="Georgia,serif" font-size="11" fill="#c2652a" text-anchor="middle" font-style="italic">Xenova Embedder · 384 dims</text>
+          <rect x="40" y="186" width="260" height="32" rx="8" fill="#c2652a" opacity="0.55"/>
+          <text x="170" y="206" font-family="Georgia,serif" font-size="11" fill="white" text-anchor="middle" font-style="italic">MongoDB Atlas · $vectorSearch</text>
+          <!-- Arrows -->
+          <line x1="170" y1="86" x2="170" y2="98" stroke="#c2652a" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.5"/>
+          <line x1="170" y1="130" x2="170" y2="142" stroke="#c2652a" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.5"/>
+          <line x1="170" y1="174" x2="170" y2="186" stroke="#c2652a" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+  <section class="section">
+    <div class="grid-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="card"><div class="card__label">Vector Model</div><div class="card__value" style="font-size:1rem;font-family:var(--font-body)">all-MiniLM-L6-v2</div><div class="card__sub">384-dimensional sentence embeddings via @xenova/transformers (fully local — no external API costs)</div></div>
+        <div class="card"><div class="card__label">Database</div><div class="card__value" style="font-size:1rem;font-family:var(--font-body)">MongoDB Atlas</div><div class="card__sub">$vectorSearch (HNSW) for similarity · Atlas Search for real-time autocomplete · unique index on title</div></div>
+        <div class="card"><div class="card__label">Auth</div><div class="card__value" style="font-size:1rem;font-family:var(--font-body)">JWT + bcryptjs</div><div class="card__sub">User accounts stored in MongoDB. Passwords hashed with bcrypt (12 rounds). Tokens expire in 7 days.</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="card">
+          <h3 style="margin-bottom:1rem">API Endpoints</h3>
+          <div style="display:flex;flex-direction:column;gap:0.65rem;font-size:0.85rem">
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">POST /auth/register</code><br><span style="color:var(--on-surface-variant)">Create a new user account</span></div>
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">POST /auth/login</code><br><span style="color:var(--on-surface-variant)">Login, receive JWT bearer token</span></div>
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">POST /api/similarity</code><br><span style="color:var(--on-surface-variant)">Find similar ideas via vector search</span></div>
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">POST /api/ideas</code><br><span style="color:var(--on-surface-variant)">Submit & store a new startup idea</span></div>
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">GET  /api/trends</code><br><span style="color:var(--on-surface-variant)">Domain saturation analysis</span></div>
+            <div><code style="background:var(--surface-container);padding:0.15rem 0.4rem;border-radius:4px;font-size:0.78rem">GET  /api/autocomplete</code><br><span style="color:var(--on-surface-variant)">Fuzzy title suggestions (Atlas Search)</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:1rem">10 Supported Domains</h3>
+          <div class="domain-pill-grid">
+            <span class="domain-pill">🤖 Agentic AI</span>
+            <span class="domain-pill">🌿 Climate Tech</span>
+            <span class="domain-pill">💳 Fintech</span>
+            <span class="domain-pill">🩺 HealthTech</span>
+            <span class="domain-pill">🔐 Cybersecurity</span>
+            <span class="domain-pill">📚 EdTech</span>
+            <span class="domain-pill">🚚 Logistics</span>
+            <span class="domain-pill">🛸 SpaceTech</span>
+            <span class="domain-pill">🌾 AgriTech</span>
+            <span class="domain-pill">🛍️ Retail/E-commerce</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div><!-- /view-about -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!--  VIEW 5 — LAUNCH GUIDE                                               -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div id="view-launch" class="view">
+
+  <section class="hero">
+    <div style="text-align: center; max-width: 640px; margin: 0 auto;">
+      <div class="hero__eyebrow" style="justify-content: center;">Launch Playbook</div>
+      <h1 class="hero__title">Ready to<br><em>Launch?</em></h1>
+      <p class="hero__subtitle" style="max-width: 100%; margin-left: auto; margin-right: auto;">Your idea passed validation. Now follow these steps to register and launch your startup globally. Each step links to official resources — no guesswork.</p>
+      <div id="launch-idea-banner" style="margin-top: 1.5rem;"></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="section">
+    <div style="max-width: 760px; margin: 0 auto;">
+
+      <!-- Step 1 -->
+      <div class="launch-step">
+        <div class="launch-step__num">01</div>
+        <div class="launch-step__content">
+          <h3>Choose Your Business Structure</h3>
+          <p>Decide how your company will be legally organized. This determines liability, taxation, and fundraising capability.</p>
+          <div class="launch-options">
+            <div class="launch-option">
+              <strong>Sole Proprietorship</strong>
+              <span>Simplest — you are the business. No separation of personal/business liability.</span>
+            </div>
+            <div class="launch-option">
+              <strong>LLC (Limited Liability Company)</strong>
+              <span>Best for most startups. Protects personal assets. Flexible taxation.</span>
+            </div>
+            <div class="launch-option launch-option--recommended">
+              <strong>C-Corporation ✨ Recommended for VC</strong>
+              <span>Required if you plan to raise venture capital. Delaware C-Corp is the global standard.</span>
+            </div>
+            <div class="launch-option">
+              <strong>LLP (Limited Liability Partnership)</strong>
+              <span>Good for co-founder teams. Popular in UK, India, Singapore.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="launch-step">
+        <div class="launch-step__num">02</div>
+        <div class="launch-step__content">
+          <h3>Register Your Company</h3>
+          <p>Officially incorporate in your chosen jurisdiction. Here are popular options worldwide:</p>
+          <div class="launch-links">
+            <a href="https://www.stripe.com/atlas" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🇺🇸</span>
+              <div>
+                <strong>Stripe Atlas</strong>
+                <span>Form a Delaware C-Corp in 1 day. Bank account + tax ID included. $500 one-time.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://www.gov.uk/set-up-limited-company" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🇬🇧</span>
+              <div>
+                <strong>UK Companies House</strong>
+                <span>Register a UK Ltd company online for £12. Takes 24 hours.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://www.mca.gov.in/content/mca/global/en/home.html" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🇮🇳</span>
+              <div>
+                <strong>MCA India (SPICe+)</strong>
+                <span>Register a Private Ltd, LLP, or OPC through the SPICe+ portal.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://www.acra.gov.sg/how-to-guides/setting-up-a-local-company" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🇸🇬</span>
+              <div>
+                <strong>ACRA Singapore</strong>
+                <span>Singapore Pte Ltd. Strong IP laws, 0% tax on first $100k. Takes 1 day.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://www.sba.gov/business-guide/launch-your-business/register-your-business" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🌐</span>
+              <div>
+                <strong>US SBA Guide</strong>
+                <span>Complete guide from the US Small Business Administration for any state.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="launch-step">
+        <div class="launch-step__num">03</div>
+        <div class="launch-step__content">
+          <h3>Protect Your Intellectual Property</h3>
+          <p>Before going public, file for IP protection in your core markets.</p>
+          <div class="launch-checklist">
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Trademark</strong> — Register your brand name and logo. Use <a href="https://www.wipo.int/madrid/en/" target="_blank">WIPO Madrid System</a> for global coverage.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Patent (Optional)</strong> — If your tech is novel, file a provisional patent. Use <a href="https://www.uspto.gov/patents/basics" target="_blank">USPTO</a> or <a href="https://www.epo.org/en" target="_blank">EPO</a>.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Domain Name</strong> — Secure your .com, .io, or country-specific domain via <a href="https://www.namecheap.com" target="_blank">Namecheap</a> or <a href="https://domains.google" target="_blank">Google Domains</a>.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>NDA Template</strong> — Have a mutual NDA ready for early conversations. Free templates on <a href="https://www.docusign.com" target="_blank">DocuSign</a>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="launch-step">
+        <div class="launch-step__num">04</div>
+        <div class="launch-step__content">
+          <h3>Set Up Financial Infrastructure</h3>
+          <p>Get your banking and payments in order before you start collecting revenue.</p>
+          <div class="launch-checklist">
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Business Bank Account</strong> — Mercury, Brex, or your local bank. Keep personal and business funds separate.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Tax ID / EIN</strong> — Apply for an Employer Identification Number (US) or equivalent in your country.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Accounting Software</strong> — Set up <a href="https://quickbooks.intuit.com" target="_blank">QuickBooks</a>, <a href="https://www.xero.com" target="_blank">Xero</a>, or <a href="https://www.zoho.com/books/" target="_blank">Zoho Books</a> from day one.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Payment Gateway</strong> — Integrate <a href="https://stripe.com" target="_blank">Stripe</a> or <a href="https://razorpay.com" target="_blank">Razorpay</a> for collecting payments globally.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="launch-step">
+        <div class="launch-step__num">05</div>
+        <div class="launch-step__content">
+          <h3>Build Your MVP & Go Live</h3>
+          <p>Ship something real. You don't need perfection — you need validation from real users.</p>
+          <div class="launch-checklist">
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Landing Page</strong> — Use <a href="https://carrd.co" target="_blank">Carrd</a>, <a href="https://webflow.com" target="_blank">Webflow</a>, or build custom. Capture emails before launch.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>MVP</strong> — Build the smallest version that solves the core problem. Ship in weeks, not months.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Launch Platform</strong> — Post on <a href="https://www.producthunt.com" target="_blank">Product Hunt</a>, <a href="https://news.ycombinator.com" target="_blank">Hacker News</a>, and relevant subreddits.</div>
+            <div class="launch-check"><span class="launch-check__box">☐</span> <strong>Analytics</strong> — Set up <a href="https://plausible.io" target="_blank">Plausible</a> or Google Analytics to track traction from day one.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="launch-step">
+        <div class="launch-step__num">06</div>
+        <div class="launch-step__content">
+          <h3>Raise Funding (Optional)</h3>
+          <p>If your idea needs capital to scale, explore these well-known paths.</p>
+          <div class="launch-links">
+            <a href="https://www.ycombinator.com/apply" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🚀</span>
+              <div>
+                <strong>Y Combinator</strong>
+                <span>$500k standard deal. The most prestigious accelerator globally.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://techstars.com" target="_blank" class="launch-link">
+              <span class="launch-link__icon">⭐</span>
+              <div>
+                <strong>Techstars</strong>
+                <span>$120k investment. 13-week accelerator program in 50+ cities.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+            <a href="https://www.antler.co" target="_blank" class="launch-link">
+              <span class="launch-link__icon">🦌</span>
+              <div>
+                <strong>Antler</strong>
+                <span>Pre-seed investor. Build from scratch with a co-founder. Global presence.</span>
+              </div>
+              <span class="launch-link__arrow">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="quote-strip">
+    <div class="quote-strip__inner">
+      <blockquote>"The best time to start was yesterday. The next best time is today."</blockquote>
+      <cite>— Every startup mentor ever</cite>
+    </div>
+  </div>
+
+  <section class="section" style="text-align: center;">
+    <div class="section__header">
+      <h2>You're Ready</h2>
+      <p>Your idea has been validated by Validra. The roadmap is clear. Go build something extraordinary.</p>
+    </div>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <button class="btn btn--primary" data-view="validator">↗ Validate Another Idea</button>
+      <button class="btn btn--ghost" data-view="ideas">🔒 Open Vault</button>
+    </div>
+  </section>
+
+</div><!-- /view-launch -->
+
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer__inner">
+    <span class="footer__copy">© 2024 Validra Intelligence · Sun-baked precision.</span>
+    <ul class="footer__links">
+      <li><a href="#" data-view="about">Methodology</a></li>
+      <li><a href="#" data-view="trends">Market Data</a></li>
+      <li><a href="/auth.html">Sign In</a></li>
+      <li><a href="http://localhost:3000/health" target="_blank">API Health ↗</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

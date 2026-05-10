@@ -1,0 +1,33 @@
+{
+  "name": "validra-startup-similarity",
+  "version": "1.0.0",
+  "description": "Startup Idea Similarity Checker – University Project",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon --watch src --watch .env src/server.js",
+    "import": "node scripts/importData.js",
+    "seed": "node scripts/seedSample.js"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "axios": "^1.16.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^6.7.0",
+    "morgan": "^1.10.0",
+    "node-cron": "^4.2.1",
+    "pdfkit": "^0.18.0",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
